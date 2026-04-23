@@ -1,29 +1,29 @@
 # -*- coding: utf-8 -*-
 import asyncio
 import logging
+import os
 from aiogram import Bot, Dispatcher, F
-from aiogram.types import Message, CallbackQuery
-from aiogram.filters import CommandStart, Command
+from aiogram.types import Message, CallbackQuery, PhotoSize
+from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 # ─────────────────────────────────────────
-#  AYARLAR — işə salmadan əvvəl doldurun
+#  AYARLAR
 # ─────────────────────────────────────────
-import os
 BOT_TOKEN = os.getenv("BOT_TOKEN")
-ADMIN_ID   = 84994299
+ADMIN_ID  = 84994299  # ← öz Telegram ID-ni yaz
 
-CHANNEL_BASIC   = "https://t.me/+0Nh0N4MbKrswMGRi"   # 1 ay, 3 ay
-CHANNEL_PREMIUM = "https://t.me/+0ZfO-9FlrMcxYTIy"   # 6 ay, 1 il
+CHANNEL_BASIC   = "https://t.me/+0Nh0N4MbKrswMGRi"
+CHANNEL_PREMIUM = "https://t.me/+0ZfO-9FlrMcxYTIy"
 
 PAYMENT_DETAILS = (
     "💳 Ödəniş rekvizitləri:\n"
     "Kart: 4169 7388 5948 0232\n"
     "Alıcı: Ad Soyad\n\n"
     "Ödənişdən sonra skrinşotu bura göndərin — "
-    "bir neçə saat ərzində kanala girişi açacağam 🙏"
+    "bir neçə saat ərzində kanala girişinizi açacağıq 🙏"
 )
 
 # ─────────────────────────────────────────
@@ -33,19 +33,19 @@ LESSONS = {
     "protein": {
         "title":   "Zülal norması",
         "file_id": "BAACAgIAAxkBAAMDaeiyIblWBo0P4mddiDzfhPTkqxUAAuicAAIYVEFLgM-zu29fhl47BA",
-        "caption": "🥚 *Zülal norması*\n\nDərsi izləyin, sualınız olsa, buradayam 😊",
+        "caption": "🥚 *Zülal norması*\n\nDərsi izləyin, sualınız olsa — buradayıq 😊",
         "emoji":   "🥚",
     },
     "oils": {
         "title":   "Yağlar reytinqi",
         "file_id": "BAACAgIAAxkBAAMFaeiyrZJ8atjDFDMGjdJQUEtnQSIAAuqcAAIYVEFLz-PeK426BC87BA",
-        "caption": "🫒 *Yağlar reytinqi*\n\nDərsi izləyin, sualınız olsa, buradayam 😊",
+        "caption": "🫒 *Yağlar reytinqi*\n\nDərsi izləyin, sualınız olsa — buradayıq 😊",
         "emoji":   "🫒",
     },
     "recipe": {
         "title":   "Resept",
         "file_id": "BAACAgIAAxkBAAMHaeiy-GZ6Hc-l9aHR-Jukmtnr_P0AAuycAAIYVEFL5gtlRbyhyJs7BA",
-        "caption": "🥗 *Resept*\n\nDərsi izləyin, sualınız olsa, buradayam 😊",
+        "caption": "🥗 *Resept*\n\nDərsi izləyin, sualınız olsa — buradayıq 😊",
         "emoji":   "🥗",
     },
 }
@@ -66,9 +66,7 @@ bot = Bot(token=BOT_TOKEN)
 dp  = Dispatcher(storage=MemoryStorage())
 
 pending_followup: dict[int, asyncio.Task] = {}
-
-# ожидающие подтверждения оплаты {user_id: pkg_key}
-pending_payment: dict[int, str] = {}
+pending_payment:  dict[int, str] = {}
 
 
 # ════════════════════════════════════════
@@ -76,14 +74,12 @@ pending_payment: dict[int, str] = {}
 # ════════════════════════════════════════
 @dp.message(CommandStart())
 async def cmd_start(msg: Message, state: FSMContext):
-    await state.clear()
     data = await state.get_data()
 
-    # если урок уже был выбран — кнопки недоступны
     if data.get("lesson_chosen"):
         await msg.answer(
             "Salam! 👋 Artıq dərsinizi seçmisiniz.\n\n"
-            "Sualınız varsa, buradayam 😊"
+            "Sualınız varsa — buradayıq 😊"
         )
         return
 
@@ -97,17 +93,17 @@ async def cmd_start(msg: Message, state: FSMContext):
 
     await msg.answer(
         "Salam! 👋 Sizi burada görmək çox xoşdur!\n\n"
-        "Mən nütrisioloqam və sizin üçün ödənişsiz qidalanma dərsləri hazırlamışam. "
+        "Mən nütrisioloqam və Sizin üçün pulsuz qidalanma dərsləri hazırlamışam. "
         "İndi hansı dərsi izləmək istədiyinizi seçin:",
         reply_markup=kb.as_markup()
     )
 
 
 # ════════════════════════════════════════
-#  file_id almaq — video faylı bota yönləndir
+#  file_id almaq (yalnız admin üçün)
 # ════════════════════════════════════════
 @dp.message(F.video)
-async def get_file_id(msg: Message):
+async def handle_video(msg: Message):
     if msg.from_user.id == ADMIN_ID:
         await msg.answer(
             f"✅ *Video faylının file\\_id-si:*\n\n`{msg.video.file_id}`\n\n"
@@ -117,30 +113,74 @@ async def get_file_id(msg: Message):
 
 
 # ════════════════════════════════════════
-#  Dərsin göndərilməsi (yalnız bir dəfə)
+#  Skrinşot qəbulu — admina yönləndir
+# ════════════════════════════════════════
+@dp.message(F.photo)
+async def handle_screenshot(msg: Message):
+    user = msg.from_user
+    if user.id == ADMIN_ID:
+        return
+
+    name     = user.full_name
+    username = f"@{user.username}" if user.username else "username yoxdur"
+    pkg_key  = pending_payment.get(user.id)
+    pkg_info = f"{PACKAGES[pkg_key]['duration']} — {PACKAGES[pkg_key]['price']} AZN" if pkg_key else "naməlum paket"
+
+    # пересылаем скриншот админу
+    kb = InlineKeyboardBuilder()
+    if pkg_key:
+        kb.button(text="✅ Ödənişi təsdiqlə", callback_data=f"confirm_{user.id}_{pkg_key}")
+        kb.button(text="❌ Ləğv et",           callback_data=f"cancel_{user.id}")
+        kb.adjust(1)
+
+    await bot.send_photo(
+        ADMIN_ID,
+        photo=msg.photo[-1].file_id,
+        caption=(
+            f"🧾 *Ödəniş skrinşotu gəldi!*\n\n"
+            f"👤 {name} ({username})\n"
+            f"🆔 ID: `{user.id}`\n"
+            f"📦 Paket: {pkg_info}"
+        ),
+        parse_mode="Markdown",
+        reply_markup=kb.as_markup() if pkg_key else None
+    )
+
+    await msg.answer(
+        "✅ Skrinşotunuz qəbul edildi! "
+        "Yoxlandıqdan sonra sizə bildiriş göndərəcəyik 🙏"
+    )
+
+
+# ════════════════════════════════════════
+#  Dərsin göndərilməsi + "Dərsə baxdım" düyməsi
 # ════════════════════════════════════════
 @dp.callback_query(F.data.startswith("lesson_"))
 async def send_lesson(call: CallbackQuery, state: FSMContext):
     data = await state.get_data()
 
-    # если урок уже выбран — игнорируем
     if data.get("lesson_chosen"):
         await call.answer("Artıq dərsinizi seçmisiniz!", show_alert=True)
         return
 
-    key = call.data.replace("lesson_", "")
+    key    = call.data.replace("lesson_", "")
     lesson = LESSONS.get(key)
     if not lesson:
         return
 
-    # помечаем что урок выбран — остальные заблокированы
     await state.update_data(lesson_chosen=True, lesson_key=key)
+    await call.message.edit_reply_markup()
 
-    await call.message.edit_reply_markup()  # убираем кнопки
+    # кнопка "Dərsə baxdım"
+    kb = InlineKeyboardBuilder()
+    kb.button(text="✅ Dərsə baxdım", callback_data="lesson_watched")
+    kb.adjust(1)
+
     await call.message.answer_video(
         video=lesson["file_id"],
         caption=lesson["caption"],
-        parse_mode="Markdown"
+        parse_mode="Markdown",
+        reply_markup=kb.as_markup()
     )
     await call.answer()
 
@@ -152,19 +192,46 @@ async def send_lesson(call: CallbackQuery, state: FSMContext):
     pending_followup[uid] = task
 
 
-async def _followup_timer(user_id: int):
-    await asyncio.sleep(10 * 60)  # 10 dəqiqə
+# ════════════════════════════════════════
+#  "Dərsə baxdım" düyməsi — soru göstər
+# ════════════════════════════════════════
+@dp.callback_query(F.data == "lesson_watched")
+async def lesson_watched(call: CallbackQuery):
+    await call.message.edit_reply_markup()
+
+    # отменяем таймер — вопрос задаём сразу
+    uid = call.from_user.id
+    if uid in pending_followup and not pending_followup[uid].done():
+        pending_followup[uid].cancel()
 
     kb = InlineKeyboardBuilder()
     kb.button(text="✅ Bəli, bütün dərsləri istəyirəm!", callback_data="interest_yes")
-    kb.button(text="❌ Xeyr, sağ ol",                    callback_data="interest_no")
+    kb.button(text="❌ Xeyr, sağ olun",                  callback_data="interest_no")
+    kb.adjust(1)
+
+    await call.message.answer(
+        "Əla! 🙌\n\n"
+        "Dərs Sizin üçün faydalı oldumu? "
+        "*Bütün dərslərə* giriş əldə etmək istərdinizmi?",
+        parse_mode="Markdown",
+        reply_markup=kb.as_markup()
+    )
+    await call.answer()
+
+
+async def _followup_timer(user_id: int):
+    await asyncio.sleep(10 * 60)  # 10 dəqiqə — əgər düyməyə basmayıbsa
+
+    kb = InlineKeyboardBuilder()
+    kb.button(text="✅ Bəli, bütün dərsləri istəyirəm!", callback_data="interest_yes")
+    kb.button(text="❌ Xeyr, sağ olun",                  callback_data="interest_no")
     kb.adjust(1)
 
     await bot.send_message(
         user_id,
         "Salam! 👋\n\n"
-        "Ümid edirəm ki, dərs faydalı oldu 🙌\n\n"
-        "Material xoşunuza gəldimi və "
+        "Ümid edirik ki, dərs Sizin üçün faydalı oldu 🙌\n\n"
+        "Deyin görək, material xoşunuza gəldimi və "
         "*bütün dərslərə* giriş əldə etmək istərdinizmi?",
         parse_mode="Markdown",
         reply_markup=kb.as_markup()
@@ -172,15 +239,15 @@ async def _followup_timer(user_id: int):
 
 
 # ════════════════════════════════════════
-#  Cavab — XEYR
+#  Cavab — XEYİR
 # ════════════════════════════════════════
 @dp.callback_query(F.data == "interest_no")
-async def interest_no(call: CallbackQuery, state: FSMContext):
+async def interest_no(call: CallbackQuery):
     await call.message.edit_reply_markup()
     await call.message.answer(
-        "Yaxşı, narahat etmirəm 😊\n\n"
-        "Sənə sağlamlıq və enerji arzulayıram! "
-        "Fikrin dəyişsə və ya sualın olsa — həmişə buradayam. Uğurlar! 🌿"
+        "Yaxşı, narahat etmirik 😊\n\n"
+        "Sizə sağlamlıq və enerji arzulayırıq! "
+        "Fikriniz dəyişsə və ya sualınız olsa — həmişə buradayıq. Uğurlar! 🌿"
     )
     await call.answer()
 
@@ -203,7 +270,7 @@ async def interest_yes(call: CallbackQuery):
     kb.adjust(1)
 
     await call.message.answer(
-        "Əla! 🎉 Sənin üçün hazırladıqlarım:\n\n"
+        "Əla! 🎉 Sizin üçün hazırladıqlarımız:\n\n"
         "📚 *Bütün dərslərlə Telegram kanalına giriş:*\n\n"
         "▪️ 1 aylıq giriş — 10 AZN\n"
         "▪️ 3 aylıq giriş — 25 AZN\n"
@@ -234,19 +301,17 @@ async def buy_package(call: CallbackQuery):
 
     await call.message.answer(
         f"Əla seçim! 🙌\n\n"
-        f"Seçdin: *{pkg['duration']}* — *{pkg['price']} AZN*{extra_text}\n\n"
+        f"Seçdiniz: *{pkg['duration']}* — *{pkg['price']} AZN*{extra_text}\n\n"
         f"{PAYMENT_DETAILS}",
         parse_mode="Markdown"
     )
 
-    # сохраняем заявку в ожидании подтверждения
     pending_payment[call.from_user.id] = key
 
-    user = call.from_user
-    name = user.full_name
+    user     = call.from_user
+    name     = user.full_name
     username = f"@{user.username}" if user.username else "username yoxdur"
 
-    # уведомление тебе с кнопкой подтверждения
     kb = InlineKeyboardBuilder()
     kb.button(text="✅ Ödənişi təsdiqlə", callback_data=f"confirm_{user.id}_{key}")
     kb.button(text="❌ Ləğv et",           callback_data=f"cancel_{user.id}")
@@ -258,7 +323,7 @@ async def buy_package(call: CallbackQuery):
         f"👤 {name} ({username})\n"
         f"🆔 ID: `{user.id}`\n"
         f"📦 Paket: {pkg['duration']} — {pkg['price']} AZN\n\n"
-        f"Ödənişi aldıqdan sonra təsdiqlə:",
+        f"Skrinşot gözləyin və ya aşağıdakı düymələrdən istifadə edin:",
         parse_mode="Markdown",
         reply_markup=kb.as_markup()
     )
@@ -266,49 +331,49 @@ async def buy_package(call: CallbackQuery):
 
 
 # ════════════════════════════════════════
-#  Admin: təsdiq düyməsi
+#  Admin: ödənişi təsdiqlə
 # ════════════════════════════════════════
 @dp.callback_query(F.data.startswith("confirm_"))
 async def confirm_payment(call: CallbackQuery):
     if call.from_user.id != ADMIN_ID:
         return
 
-    parts = call.data.split("_")
+    parts   = call.data.split("_")
     user_id = int(parts[1])
     pkg_key = parts[2]
-    pkg = PACKAGES.get(pkg_key)
+    pkg     = PACKAGES.get(pkg_key)
 
     await call.message.edit_reply_markup()
 
-    channel = CHANNEL_PREMIUM if pkg["premium"] else CHANNEL_BASIC
+    channel      = CHANNEL_PREMIUM if pkg["premium"] else CHANNEL_BASIC
     channel_name = "Premium kanal" if pkg["premium"] else "Əsas kanal"
 
-    # отправляем клиенту ссылку на канал
     kb = InlineKeyboardBuilder()
-    kb.button(text=f"📺 {channel_name}ə keçin", url=channel)
+    kb.button(text=f"📺 {channel_name}a keç", url=channel)
     if pkg["premium"]:
-        kb.button(text="📺 Əsas kanala da keçin", url=CHANNEL_BASIC)
+        kb.button(text="📺 Əsas kanala da keç", url=CHANNEL_BASIC)
     kb.adjust(1)
 
-    await bot.send_message(
-        user_id,
-        "🎉 Ödənişiniz təsdiqləndi!\n\n"
-        "Təşəkkür edirik! Aşağıdakı düyməyə basaraq kanala qoşulun:",
-        reply_markup=kb.as_markup()
-    )
+    try:
+        await bot.send_message(
+            user_id,
+            "🎉 Ödənişiniz təsdiqləndi!\n\n"
+            "Təşəkkür edirik! Aşağıdakı düyməyə basaraq kanala qoşulun:",
+            reply_markup=kb.as_markup()
+        )
+        await call.message.answer(
+            f"✅ Təsdiq göndərildi. İstifadəçi ID: `{user_id}`",
+            parse_mode="Markdown"
+        )
+    except Exception as e:
+        await call.message.answer(f"⚠️ Xəta: {e}")
 
-    await call.message.answer(
-        f"✅ Təsdiq göndərildi. İstifadəçi ID: `{user_id}`",
-        parse_mode="Markdown"
-    )
-    await call.answer()
-
-    # убираем из ожидания
     pending_payment.pop(user_id, None)
+    await call.answer()
 
 
 # ════════════════════════════════════════
-#  Admin: ləğv düyməsi
+#  Admin: ləğv et
 # ════════════════════════════════════════
 @dp.callback_query(F.data.startswith("cancel_"))
 async def cancel_payment(call: CallbackQuery):
@@ -318,11 +383,15 @@ async def cancel_payment(call: CallbackQuery):
     user_id = int(call.data.split("_")[1])
     await call.message.edit_reply_markup()
 
-    await bot.send_message(
-        user_id,
-        "Təəssüf ki, ödənişiniz təsdiqlənmədi. "
-        "Probleminiz varsa bizimlə əlaqə saxlayın."
-    )
+    try:
+        await bot.send_message(
+            user_id,
+            "Təəssüf ki, ödənişiniz təsdiqlənmədi. "
+            "Probleminiz varsa bizimlə əlaqə saxlayın."
+        )
+    except Exception as e:
+        await call.message.answer(f"⚠️ Xəta: {e}")
+
     await call.message.answer(f"❌ Sifariş ləğv edildi. ID: `{user_id}`", parse_mode="Markdown")
     pending_payment.pop(user_id, None)
     await call.answer()
