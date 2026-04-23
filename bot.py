@@ -12,7 +12,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 # ─────────────────────────────────────────
 #  AYARLAR
 # ─────────────────────────────────────────
-BOT_TOKEN = os.getenv("BOT_TOKEN")
+BOT_TOKEN = os.getenv("8707564403:AAG1tRYXgwUKcM_Cd3StQ7zzMK8WxJMDF0U")
 ADMIN_ID  = 84994299  # ← öz Telegram ID-ni yaz
 
 CHANNEL_BASIC   = "https://t.me/+0Nh0N4MbKrswMGRi"
@@ -338,10 +338,15 @@ async def confirm_payment(call: CallbackQuery):
     if call.from_user.id != ADMIN_ID:
         return
 
-    parts   = call.data.split("_")
-    user_id = int(parts[1])
-    pkg_key = parts[2]
+    # confirm_{user_id}_{pkg_key} e.g. confirm_123456789_pkg_1m
+    _, user_id_str, *pkg_parts = call.data.split("_")
+    user_id = int(user_id_str)
+    pkg_key = "_".join(pkg_parts)  # pkg_1m, pkg_3m, pkg_6m, pkg_12m
     pkg     = PACKAGES.get(pkg_key)
+    if not pkg:
+        await call.message.answer(f"⚠️ Paket tapılmadı: {pkg_key}")
+        await call.answer()
+        return
 
     await call.message.edit_reply_markup()
 
@@ -349,9 +354,9 @@ async def confirm_payment(call: CallbackQuery):
     channel_name = "Premium kanal" if pkg["premium"] else "Əsas kanal"
 
     kb = InlineKeyboardBuilder()
-    kb.button(text=f"📺 {channel_name}a keç", url=channel)
+    kb.button(text=f"📺 {channel_name}a daxil ol", url=channel)
     if pkg["premium"]:
-        kb.button(text="📺 Əsas kanala da keç", url=CHANNEL_BASIC)
+        kb.button(text="📺 Əsas kanala da daxil ol", url=CHANNEL_BASIC)
     kb.adjust(1)
 
     try:
