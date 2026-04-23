@@ -360,7 +360,7 @@ async def confirm_payment(call: CallbackQuery):
     kb.adjust(1)
 
     try:
-        await bot.send_message(
+        sent = await bot.send_message(
             user_id,
             "🎉 Ödənişiniz təsdiqləndi!\n\n"
             "Təşəkkür edirik! Aşağıdakı düyməyə basaraq kanala qoşulun:",
@@ -370,11 +370,24 @@ async def confirm_payment(call: CallbackQuery):
             f"✅ Təsdiq göndərildi. İstifadəçi ID: `{user_id}`",
             parse_mode="Markdown"
         )
+        asyncio.create_task(_remove_buttons(user_id, sent.message_id))
     except Exception as e:
         await call.message.answer(f"⚠️ Xəta: {e}")
 
     pending_payment.pop(user_id, None)
     await call.answer()
+
+
+async def _remove_buttons(chat_id: int, message_id: int):
+    await asyncio.sleep(30)
+    try:
+        await bot.edit_message_reply_markup(
+            chat_id=chat_id,
+            message_id=message_id,
+            reply_markup=None
+        )
+    except Exception:
+        pass
 
 
 # ════════════════════════════════════════
