@@ -173,7 +173,7 @@ async def send_lesson(call: CallbackQuery, state: FSMContext):
 
     # кнопка "Dərsə baxdım"
     kb = InlineKeyboardBuilder()
-    kb.button(text="✅ Dərsə baxdım", callback_data="lesson_watched")
+    kb.button(text="✅ Dərsə baxdım", callback_data="watched")
     kb.adjust(1)
 
     await call.message.answer_video(
