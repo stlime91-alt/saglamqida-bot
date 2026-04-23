@@ -195,7 +195,7 @@ async def send_lesson(call: CallbackQuery, state: FSMContext):
 # ════════════════════════════════════════
 #  "Dərsə baxdım" düyməsi — soru göstər
 # ════════════════════════════════════════
-@dp.callback_query(F.data == "lesson_watched")
+@dp.callback_query(F.data == "watched")
 async def lesson_watched(call: CallbackQuery):
     await call.message.edit_reply_markup()
 
