@@ -12,7 +12,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 # ─────────────────────────────────────────
 #  AYARLAR
 # ─────────────────────────────────────────
-BOT_TOKEN = os.getenv("8707564403:AAG1tRYXgwUKcM_Cd3StQ7zzMK8WxJMDF0U")
+BOT_TOKEN = os.getenv("BOT_TOKEN")
 ADMIN_ID  = 84994299  # ← öz Telegram ID-ni yaz
 
 CHANNEL_BASIC   = "https://t.me/+0Nh0N4MbKrswMGRi"
