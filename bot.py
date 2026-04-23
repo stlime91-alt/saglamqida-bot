@@ -9,7 +9,7 @@ from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 # ─────────────────────────────────────────
-#  AYARLAR — işə salmadan əvvəl doldur
+#  AYARLAR — işə salmadan əvvəl doldurun
 # ─────────────────────────────────────────
 import os
 BOT_TOKEN = os.getenv("BOT_TOKEN")
@@ -22,7 +22,7 @@ PAYMENT_DETAILS = (
     "💳 Ödəniş rekvizitləri:\n"
     "Kart: 4169 7388 5948 0232\n"
     "Alıcı: Ad Soyad\n\n"
-    "Ödənişdən sonra skrinşotu bura göndər — "
+    "Ödənişdən sonra skrinşotu bura göndərin — "
     "bir neçə saat ərzində kanala girişi açacağam 🙏"
 )
 
@@ -33,19 +33,19 @@ LESSONS = {
     "protein": {
         "title":   "Zülal norması",
         "file_id": "BAACAgIAAxkBAAMDaeiyIblWBo0P4mddiDzfhPTkqxUAAuicAAIYVEFLgM-zu29fhl47BA",
-        "caption": "🥩 *Zülal norması*\n\nDərsi izlə, sualın olsa — buradayam 😊",
-        "emoji":   "🥩",
+        "caption": "🥚 *Zülal norması*\n\nDərsi izləyin, sualınız olsa, buradayam 😊",
+        "emoji":   "🥚",
     },
     "oils": {
         "title":   "Yağlar reytinqi",
         "file_id": "BAACAgIAAxkBAAMFaeiyrZJ8atjDFDMGjdJQUEtnQSIAAuqcAAIYVEFLz-PeK426BC87BA",
-        "caption": "🫒 *Yağlar reytinqi*\n\nDərsi izlə, sualın olsa — buradayam 😊",
+        "caption": "🫒 *Yağlar reytinqi*\n\nDərsi izləyin, sualınız olsa, buradayam 😊",
         "emoji":   "🫒",
     },
     "recipe": {
         "title":   "Resept",
         "file_id": "BAACAgIAAxkBAAMHaeiy-GZ6Hc-l9aHR-Jukmtnr_P0AAuycAAIYVEFL5gtlRbyhyJs7BA",
-        "caption": "🥗 *Resept*\n\nDərsi izlə, sualın olsa — buradayam 😊",
+        "caption": "🥗 *Resept*\n\nDərsi izləyin, sualınız olsa, buradayam 😊",
         "emoji":   "🥗",
     },
 }
@@ -83,7 +83,7 @@ async def cmd_start(msg: Message, state: FSMContext):
     if data.get("lesson_chosen"):
         await msg.answer(
             "Salam! 👋 Artıq dərsinizi seçmisiniz.\n\n"
-            "Sualınız varsa — buradayam 😊"
+            "Sualınız varsa, buradayam 😊"
         )
         return
 
@@ -96,9 +96,9 @@ async def cmd_start(msg: Message, state: FSMContext):
     kb.adjust(1)
 
     await msg.answer(
-        "Salam! 👋 Səni burada görmək çox xoşdur!\n\n"
-        "Mən nütrisioloqam və sənin üçün pulsuz qidalanma dərsləri hazırlamışam. "
-        "İndi hansı dərsi izləmək istədiyini seç:",
+        "Salam! 👋 Sizi burada görmək çox xoşdur!\n\n"
+        "Mən nütrisioloqam və sizin üçün ödənişsiz qidalanma dərsləri hazırlamışam. "
+        "İndi hansı dərsi izləmək istədiyinizi seçin:",
         reply_markup=kb.as_markup()
     )
 
@@ -164,15 +164,15 @@ async def _followup_timer(user_id: int):
         user_id,
         "Salam! 👋\n\n"
         "Ümid edirəm ki, dərs faydalı oldu 🙌\n\n"
-        "De görüm, material xoşuna gəldimi və "
-        "*bütün dərslərə* giriş əldə etmək istərdinmi?",
+        "Material xoşunuza gəldimi və "
+        "*bütün dərslərə* giriş əldə etmək istərdinizmi?",
         parse_mode="Markdown",
         reply_markup=kb.as_markup()
     )
 
 
 # ════════════════════════════════════════
-#  Cavab — XEYİR
+#  Cavab — XEYR
 # ════════════════════════════════════════
 @dp.callback_query(F.data == "interest_no")
 async def interest_no(call: CallbackQuery, state: FSMContext):
@@ -209,7 +209,7 @@ async def interest_yes(call: CallbackQuery):
         "▪️ 3 aylıq giriş — 25 AZN\n"
         "⭐️ 6 aylıq giriş — 45 AZN *(+ yay və payızda çıxacaq yeni dərslər)* 🎁\n"
         "⭐️ 1 illik giriş — 60 AZN *(+ yay və payızda çıxacaq yeni dərslər)* 🎁\n\n"
-        "Uyğun variantı seç:",
+        "Uyğun variantı seçin:",
         parse_mode="Markdown",
         reply_markup=kb.as_markup()
     )
@@ -285,15 +285,15 @@ async def confirm_payment(call: CallbackQuery):
 
     # отправляем клиенту ссылку на канал
     kb = InlineKeyboardBuilder()
-    kb.button(text=f"📺 {channel_name}ə keç", url=channel)
+    kb.button(text=f"📺 {channel_name}ə keçin", url=channel)
     if pkg["premium"]:
-        kb.button(text="📺 Əsas kanala da keç", url=CHANNEL_BASIC)
+        kb.button(text="📺 Əsas kanala da keçin", url=CHANNEL_BASIC)
     kb.adjust(1)
 
     await bot.send_message(
         user_id,
         "🎉 Ödənişiniz təsdiqləndi!\n\n"
-        "Təşəkkür edirik! Aşağıdakı düyməyə basaraq kanala qoşul:",
+        "Təşəkkür edirik! Aşağıdakı düyməyə basaraq kanala qoşulun:",
         reply_markup=kb.as_markup()
     )
 
