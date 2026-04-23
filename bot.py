@@ -335,7 +335,9 @@ async def buy_package(call: CallbackQuery):
 # ════════════════════════════════════════
 @dp.callback_query(F.data.startswith("confirm_"))
 async def confirm_payment(call: CallbackQuery):
+    await call.message.answer(f"DEBUG: {call.from_user.id} vs {ADMIN_ID}")
     if call.from_user.id != ADMIN_ID:
+        await call.message.answer("DEBUG: not admin!")
         return
 
     # confirm_{user_id}_{pkg_key} e.g. confirm_123456789_pkg_1m
