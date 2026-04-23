@@ -93,8 +93,8 @@ async def cmd_start(msg: Message, state: FSMContext):
 
     await msg.answer(
         "Salam! 👋 Sizi burada görmək çox xoşdur!\n\n"
-        "Mən nütrisioloqam və Sizin üçün pulsuz qidalanma dərsləri hazırlamışam. "
-        "İndi hansı dərsi izləmək istədiyinizi seçin:",
+        "Mən nütrisioloqam və Sizin üçün ödənişsiz qidalanma dərsləri hazırlamışam. "
+        "İndi 3 dərsdən daha çox izləmək istədiyinizi seçin:",
         reply_markup=kb.as_markup()
     )
 
