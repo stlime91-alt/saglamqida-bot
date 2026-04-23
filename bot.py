@@ -13,14 +13,14 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 # ─────────────────────────────────────────
 import os
 BOT_TOKEN = os.getenv("BOT_TOKEN")
-ADMIN_ID   = 123456789
+ADMIN_ID   = 84994299
 
 CHANNEL_BASIC   = "https://t.me/+0Nh0N4MbKrswMGRi"   # 1 ay, 3 ay
 CHANNEL_PREMIUM = "https://t.me/+0ZfO-9FlrMcxYTIy"   # 6 ay, 1 il
 
 PAYMENT_DETAILS = (
     "💳 Ödəniş rekvizitləri:\n"
-    "Kart: 1234 5678 9012 3456\n"
+    "Kart: 4169 7388 5948 0232\n"
     "Alıcı: Ad Soyad\n\n"
     "Ödənişdən sonra skrinşotu bura göndər — "
     "bir neçə saat ərzində kanala girişi açacağam 🙏"
