@@ -48,10 +48,9 @@ LESSONS = {
 }
 
 PACKAGES = {
-    "pkg_1m":  {"name": "1 ay",  "duration": "1 aylıq giriş",  "price": 10, "premium": False},
-    "pkg_3m":  {"name": "3 ay",  "duration": "3 aylıq giriş",  "price": 25, "premium": False},
-    "pkg_6m":  {"name": "6 ay",  "duration": "6 aylıq giriş",  "price": 45, "premium": True},
-    "pkg_12m": {"name": "1 il",  "duration": "1 illik giriş",  "price": 60, "premium": True},
+    "pkg_10d": {"name": "10 gün", "duration": "10 günlük giriş", "price": 10,  "premium": False},
+    "pkg_3m":  {"name": "3 ay",   "duration": "3 aylıq giriş",   "price": 29,  "premium": False},
+    "pkg_6m":  {"name": "6 ay",   "duration": "6 aylıq giriş",   "price": 100, "premium": True},
 }
 
 logging.basicConfig(level=logging.INFO)
@@ -285,10 +284,9 @@ async def interest_yes(call: CallbackQuery):
     await call.message.answer(
         "Əla! 🎉 Sizin üçün hazırladıqlarımız:\n\n"
         "📚 *Bütün dərslərlə Telegram kanalına giriş:*\n\n"
-        "▪️ 1 aylıq giriş — 10 AZN\n"
-        "▪️ 3 aylıq giriş — 25 AZN\n"
-        "⭐️ 6 aylıq giriş — 45 AZN *(+ yay və payızda çıxacaq yeni dərslər)* 🎁\n"
-        "⭐️ 1 illik giriş — 60 AZN *(+ yay və payızda çıxacaq yeni dərslər)* 🎁\n\n"
+        "▪️ 10 günlük giriş — 10 AZN\n"
+        "⭐️ 3 aylıq giriş — 29 AZN *(+ yay kolleksiyası 5 yeni dərs + online vərdiş cədvəli)*\n"
+        "🏆 6 aylıq VIP giriş — 100 AZN *(+ 30 dəq fərdi konsultasiya + 30% endirim)*\n\n"
         "Uyğun variantı seçin:",
         parse_mode="Markdown",
         reply_markup=kb.as_markup()
