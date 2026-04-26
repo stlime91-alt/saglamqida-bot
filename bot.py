@@ -48,9 +48,9 @@ LESSONS = {
 }
 
 PACKAGES = {
-    "pkg_10d": {"name": "10 gün", "duration": "10 günlük giriş", "price": 10,  "premium": False},
-    "pkg_3m":  {"name": "3 ay",   "duration": "3 aylıq giriş",   "price": 29,  "premium": False},
-    "pkg_6m":  {"name": "6 ay",   "duration": "6 aylıq giriş",   "price": 100, "premium": True},
+    "pkg_10d": {"name": "Mini təlim", "duration": "Mini təlim (10 gün)", "price": 10,  "premium": False},
+    "pkg_3m":  {"name": "Tam təlim",  "duration": "Tam təlim (3 ay)",    "price": 29,  "premium": False},
+    "pkg_6m":  {"name": "VİP təlim",  "duration": "VİP təlim (6 ay)",    "price": 100, "premium": True},
 }
 
 logging.basicConfig(level=logging.INFO)
@@ -284,9 +284,9 @@ async def interest_yes(call: CallbackQuery):
     await call.message.answer(
         "Əla! 🎉 Sizin üçün hazırladıqlarımız:\n\n"
         "📚 *Bütün dərslərlə Telegram kanalına giriş:*\n\n"
-        "▪️ 10 günlük giriş — 10 AZN\n"
-        "⭐️ 3 aylıq giriş — 29 AZN *(+ yay kolleksiyası 5 yeni dərs + online vərdiş cədvəli)*\n"
-        "🏆 6 aylıq VIP giriş — 100 AZN *(+ 30 dəq fərdi konsultasiya + 30% endirim)*\n\n"
+        "▪️ *Mini təlim* (10 gün) — 10 AZN\n"
+        "⭐️ *Tam təlim* (3 ay) — 29 AZN\n_+ yay kolleksiyası (5 yeni dərs) + online vərdiş cədvəli_\n\n"
+        "🏆 *VİP təlim* (6 ay) — 100 AZN\n_+ 30 dəqiqəlik fərdi konsultasiya + idman/yuxu təlimlərinə 30% endirim_\n\n"
         "Uyğun variantı seçin:",
         parse_mode="Markdown",
         reply_markup=kb.as_markup()
